@@ -210,12 +210,67 @@ readme
 cat readme
 IueksS7Ubh8G3DCwVzrTd8rAVOwq3M5x
 ```
-## Bandit18 - 19
+## Bandit19 - 20
 ```
-bandit19@bandit:~$ ./bandit20-do /bin/bash
-bash-4.4$ whoami
-bandit19
-bash-4.4$ cat /etc/bandit_pass/bandit19
-IueksS7Ubh8G3DCwVzrTd8rAVOwq3M5x
-bash-4.4$
+bandit19@bandit:~$ ./bandit20-do whoami
+bandit20
+bandit19@bandit:~$ ./bandit20-do id
+uid=11019(bandit19) gid=11019(bandit19) euid=11020(bandit20) groups=11019(bandit19)
+bandit19@bandit:~$ ./bandit20-do sh
+$ whoami
+bandit20
+$ cat bandit20
+GbKksEFF4yrVs6il55v6gwY5aVje5f0j
+```
+## Bandit20 - 21
+```
+bandit20@bandit:~$ echo -n "GbKksEFF4yrVs6il55v6gwY5aVje5f0j" | nc -lnvp 25001
+listening on [any] 25001 ...
+
+
+bandit20@bandit:~$ ./suconnect 25001
+Read: GbKksEFF4yrVs6il55v6gwY5aVje5f0j
+Password matches, sending next password
+
+connect to [127.0.0.1] from (UNKNOWN) [127.0.0.1] 33826
+gE269g2h3mw3pwgrj0Ha9Uoqen1c9DGr
+bandit20@bandit:~$
+
+```
+## Bandit21 - 22
+```
+bandit21@bandit:~$ ls -la /etc/cron.d
+total 24
+drwxr-xr-x  2 root root 4096 Oct 16  2018 .
+drwxr-xr-x 88 root root 4096 Oct 16  2018 ..
+-rw-r--r--  1 root root  120 Oct 16  2018 cronjob_bandit22
+-rw-r--r--  1 root root  122 Oct 16  2018 cronjob_bandit23
+-rw-r--r--  1 root root  120 Oct 16  2018 cronjob_bandit24
+-rw-r--r--  1 root root  102 Oct  7  2017 .placeholder
+bandit21@bandit:~$ cat /etc/cron.d/*
+@reboot bandit22 /usr/bin/cronjob_bandit22.sh &> /dev/null
+* * * * * bandit22 /usr/bin/cronjob_bandit22.sh &> /dev/null
+@reboot bandit23 /usr/bin/cronjob_bandit23.sh  &> /dev/null
+* * * * * bandit23 /usr/bin/cronjob_bandit23.sh  &> /dev/null
+@reboot bandit24 /usr/bin/cronjob_bandit24.sh &> /dev/null
+* * * * * bandit24 /usr/bin/cronjob_bandit24.sh &> /dev/null
+bandit21@bandit:~$ cat /usr/bin/cronjob_bandit22.sh
+#!/bin/bash
+chmod 644 /tmp/t7O6lds9S0RqQh9aMcz6ShpAoZKF7fgv
+cat /etc/bandit_pass/bandit22 > /tmp/t7O6lds9S0RqQh9aMcz6ShpAoZKF7fgv
+cat /etc/bandit_pass/bandit22 > /tmp/t7O6lds9S0RqQh9aMcz6ShpAoZKF7fgv
+bandit21@bandit:/etc/cron.d$ cat /tmp/t7O6lds9S0RqQh9aMcz6ShpAoZKF7fgv
+Yk7owGAcWjwMVRwrTesJEwB7WVOiILLI
+bandit21@bandit:/etc/cron.d$
+```
+## Bandit22 - 23
+```
+bandit22@bandit:~$ $(echo I am user bandit23 | md5sum | cut -d ' ' -f 1)
+-bash: 8ca319486bfbbc3663ea0fbe81326349: command not found
+bandit22@bandit:~$ cat /tmp/8ca319486bfbbc3663ea0fbe81326349
+jc1udXuA1tiHqjIsL8yaapX5XIAI6i0n
+```
+## Bandit23 - 24
+```
+
 ```
