@@ -5,7 +5,7 @@
 bandit0@bandit:~$ cat readme
 boJ9jbbUNNfktd78OOpsqOltutMc3MY1
 bandit0@bandit:~$
-
+```
 ## Bandit1 -> Bandit2
 ```
 find . -exec cat '{}' \; -print
@@ -13,7 +13,6 @@ SNIP
 CV1DtqXWVFXTvM2F0k09SHz0YwRINYA9
 SNIP
 ```
-
 ## Bandit2 - 3
 ```
 bandit2@bandit:~$ cat spaces\ in\ this\ filename
