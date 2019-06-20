@@ -190,7 +190,7 @@ vBgsyi/sN3RqRBcGU40fOoZyfAMT8s1m/uYv52O6IgeuZ/ujbjY=
 -----END RSA PRIVATE KEY-----
 
 ```
-## Bandit18 - 19
+## Bandit17 - 18
 ```
 bandit17@bandit:~$ diff passwords.new passwords.old
 42c42
@@ -198,4 +198,24 @@ bandit17@bandit:~$ diff passwords.new passwords.old
 ---
 > hlbSBPAWJmL6WFDb06gpTx1pPButblOA
 ```
-## Bandit19 - 20
+## Bandit18 - 19
+```
+C:\Users\Jay [19] DESKTOP-SU9J5D3\Jay PS>ssh bandit18@bandit.labs.overthewire.org -p2220 /bin/bash
+This is a OverTheWire game server. More information on http://www.overthewire.org/wargames
+
+bandit18@bandit.labs.overthewire.org's password:
+
+ls
+readme
+cat readme
+IueksS7Ubh8G3DCwVzrTd8rAVOwq3M5x
+```
+## Bandit18 - 19
+```
+bandit19@bandit:~$ ./bandit20-do /bin/bash
+bash-4.4$ whoami
+bandit19
+bash-4.4$ cat /etc/bandit_pass/bandit19
+IueksS7Ubh8G3DCwVzrTd8rAVOwq3M5x
+bash-4.4$
+```
