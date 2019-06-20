@@ -190,3 +190,12 @@ vBgsyi/sN3RqRBcGU40fOoZyfAMT8s1m/uYv52O6IgeuZ/ujbjY=
 -----END RSA PRIVATE KEY-----
 
 ```
+## Bandit18 - 19
+```
+bandit17@bandit:~$ diff passwords.new passwords.old
+42c42
+< kfBf3eYk5BPBRzwjqutbbfE887SVc5Yd
+---
+> hlbSBPAWJmL6WFDb06gpTx1pPButblOA
+```
+## Bandit19 - 20
