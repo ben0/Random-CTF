@@ -350,3 +350,126 @@ v for vim
 :e /etc/bandit_pass/bandit26
 5czgV9L3Xx8JPOyRbXh6lQbmIOWvPT6Z
 ```
+## Bandit26 - 27
+```
+v for vim
+:set shell=/bin/bash
+:shell
+./bandit27-do
+id
+cat /etc/bandit_pass/bandit27
+3ba3118a22e93127a4ed485be72ef5ea
+```
+## Bandit27 - 28
+```
+git clone ssh://bandit27-git@localhost/home/bandit27-git/repo /tmp/jb-git
+bandit27@bandit:/tmp/jb-git$ git show
+commit 6354e5e14f9358b9097fddb6e79a2f67991e90d6
+Author: Ben Dover <noone@overthewire.org>
+Date:   Tue Oct 16 14:00:37 2018 +0200
+
+    initial commit of README
+
+diff --git a/README b/README
+new file mode 100644
+index 0000000..e7bb169
+--- /dev/null
++++ b/README
+@@ -0,0 +1 @@
++The password to the next level is: 0ef186ac70e04ea33b4c1853d2526fa2
+bandit27@bandit:/tmp/jb-git$
+```
+## Bandit28 - 29
+```
+bandit28@bandit:/tmp/jb-git2$ git show
+commit 073c27c130e6ee407e12faad1dd3848a110c4f95
+Author: Morla Porla <morla@overthewire.org>
+Date:   Tue Oct 16 14:00:39 2018 +0200
+
+    fix info leak
+
+diff --git a/README.md b/README.md
+index 3f7cee8..5c6457b 100644
+--- a/README.md
++++ b/README.md
+@@ -4,5 +4,5 @@ Some notes for level29 of bandit.
+ ## credentials
+
+ - username: bandit29
+-- password: bbc96594b4e001778eee9975372716b2
++- password: xxxxxxxxxx
+
+bandit28@bandit:/tmp/jb-git2$
+```
+## Bandit29 - 30
+```
+bandit29@bandit:/tmp/jb-git3$ git show origin/dev
+commit 33ce2e95d9c5d6fb0a40e5ee9a2926903646b4e3
+Author: Morla Porla <morla@overthewire.org>
+Date:   Tue Oct 16 14:00:41 2018 +0200
+
+    add data needed for development
+
+diff --git a/README.md b/README.md
+index 1af21d3..39b87a8 100644
+--- a/README.md
++++ b/README.md
+@@ -4,5 +4,5 @@ Some notes for bandit30 of bandit.
+ ## credentials
+
+ - username: bandit30
+-- password: <no passwords in production!>
++- password: 5b90576bedb2cc04c86a9e924ce42faf
+
+bandit29@bandit:/tmp/jb-git3$
+```
+## Bandit30 - 31
+```
+bandit30@bandit:/tmp/jb-git4$ git show secret
+47e603bb428404d265f59c42920d81e5
+bandit30@bandit:/tmp/jb-git4$
+```
+## Bandit31 - 32
+```
+bandit31@bandit:/tmp/jb-git6$ git clone ssh://bandit31-git@localhost/home/bandit31-git/repo /tmp/jb-git6
+bandit31@bandit:/tmp/jb-git6$ cd /tmp/jb-git6
+bandit31@bandit:/tmp/jb-git6$ cat README.md
+bandit31@bandit:/tmp/jb-git6$ vi key.txt
+bandit31@bandit:/tmp/jb-git6$ git add key.txt  -f
+bandit31@bandit:/tmp/jb-git6$ git commit
+bandit31@bandit:/tmp/jb-git6$ git push
+bandit31@bandit:/tmp/jb-git6$ git push
+Could not create directory '/home/bandit31/.ssh'.
+The authenticity of host 'localhost (127.0.0.1)' can't be established.
+ECDSA key fingerprint is SHA256:98UL0ZWr85496EtCRkKlo20X3OPnyPSB5tB5RPbhczc.
+Are you sure you want to continue connecting (yes/no)? yes
+Failed to add the host to the list of known hosts (/home/bandit31/.ssh/known_hosts).
+This is a OverTheWire game server. More information on http://www.overthewire.org/wargames
+
+bandit31-git@localhost's password:
+Counting objects: 3, done.
+Delta compression using up to 4 threads.
+Compressing objects: 100% (2/2), done.
+Writing objects: 100% (3/3), 321 bytes | 0 bytes/s, done.
+Total 3 (delta 0), reused 0 (delta 0)
+remote: ### Attempting to validate files... ####
+remote:
+remote: .oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
+remote:
+remote: Well done! Here is the password for the next level:
+remote: 56a9bf19c63d650ce78e6ec0354ee45e
+remote:
+remote: .oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.oOo.
+remote:
+To ssh://localhost/home/bandit31-git/repo
+ ! [remote rejected] master -> master (pre-receive hook declined)
+error: failed to push some refs to 'ssh://bandit31-git@localhost/home/bandit31-git/repo'
+```
+## Bandit32 - 33
+```
+
+```
+## Bandit33 - 34
+```
+
+```
