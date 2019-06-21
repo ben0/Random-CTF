@@ -346,5 +346,7 @@ Exiting.
 ```
 ## Bandit25 - 26
 ```
-uNG9O58gUE7snukf3bvZ0rxhtnjzSGzG
+v for vim
+:e /etc/bandit_pass/bandit26
+5czgV9L3Xx8JPOyRbXh6lQbmIOWvPT6Z
 ```
