@@ -467,9 +467,20 @@ error: failed to push some refs to 'ssh://bandit31-git@localhost/home/bandit31-g
 ```
 ## Bandit32 - 33
 ```
-
+Typing $0 will substitute the first variable of the invocation of the current shell which is sh, and launch our sh shell.
+$ cat /etc/bandit_pass/bandit33
+c9c3199ddf4121b10cf581a98d51caee
+$
 ```
 ## Bandit33 - 34
 ```
+bandit33@bandit:~$ cat README.txt
+Congratulations on solving the last level of this game!
 
+At this moment, there are no more levels to play in this game. However, we are constantly working
+on new levels and will most likely expand this game with more levels soon.
+Keep an eye out for an announcement on our usual communication channels!
+In the meantime, you could play some of our other wargames.
+
+If you have an idea for an awesome new level, please let us know!
 ```
