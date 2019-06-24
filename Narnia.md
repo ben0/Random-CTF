@@ -3,6 +3,10 @@
 ## Generic stuff
 Use peda: `source /usr/local/peda/peda.py`
 
+## Lessons:
+`Try different shellcode`\
+`Shell vs Debugger: env vaiables may push stack down further`
+
 ## Narnia0
 ```
 narnia0@narnia:/narnia$ ./narnia0
