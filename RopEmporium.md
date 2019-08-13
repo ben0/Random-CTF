@@ -1,6 +1,6 @@
 # Rop Emporium
 
-## 1) Ret2win
+## 0) Ret2win
 
 ### GDB function
 ```
@@ -89,3 +89,4 @@ You there madam, may I have your input please? And don't worry about null bytes,
 
 > Thank you! Here's your flag:ROPE{a_placeholder_32byte_flag!}
 ```
+## 1)
