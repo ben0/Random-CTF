@@ -2,7 +2,7 @@
 
 ## Tools
 Rabin2
-Ra2 - izz
+R2 - izz
 Gdb - info functions
 objdump
 ROPGadget
