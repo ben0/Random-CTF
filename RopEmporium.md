@@ -1,10 +1,10 @@
 # Rop Emporium
 
 ## Tools
-Rabin2
-R2 - izz
-Gdb - info functions
-objdump
+Rabin2\
+R2 - izz\
+Gdb - info functions\
+objdump\
 ROPGadget
 
 ## 0) Ret2win
