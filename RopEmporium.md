@@ -593,3 +593,52 @@ write4 by ROP Emporium
 Go ahead and give me the string already!
 > ROPE{a_placeholder_32byte_flag!}
 ```
+
+## Badchars
+
+### NM
+```
+[root:~/Downloads/RopEmporium]# nm badchars | grep ' t ' 
+0000000000400a40 t checkBadchars
+00000000004007c0 t deregister_tm_clones
+0000000000400840 t __do_global_dtors_aux
+0000000000400860 t frame_dummy
+00000000004009f0 t nstrlen
+00000000004008f5 t pwnme
+0000000000400800 t register_tm_clones
+00000000004009df t usefulFunction
+```
+### GDB info functions
+```
+pwndbg> info functions 
+All defined functions:
+
+Non-debugging symbols:
+0x0000000000400698  _init
+0x00000000004006d0  free@plt
+0x00000000004006e0  puts@plt
+0x00000000004006f0  system@plt
+0x0000000000400700  printf@plt
+0x0000000000400710  memset@plt
+0x0000000000400720  __libc_start_main@plt
+0x0000000000400730  fgets@plt
+0x0000000000400740  memcpy@plt
+0x0000000000400750  malloc@plt
+0x0000000000400760  setvbuf@plt
+0x0000000000400770  exit@plt
+0x0000000000400780  __gmon_start__@plt
+0x0000000000400790  _start
+0x00000000004007c0  deregister_tm_clones
+0x0000000000400800  register_tm_clones
+0x0000000000400840  __do_global_dtors_aux
+0x0000000000400860  frame_dummy
+0x0000000000400886  main
+0x00000000004008f5  pwnme
+0x00000000004009df  usefulFunction
+0x00000000004009f0  nstrlen
+0x0000000000400a40  checkBadchars
+0x0000000000400b30  usefulGadgets
+0x0000000000400b50  __libc_csu_init
+0x0000000000400bc0  __libc_csu_fini
+0x0000000000400bc4  _fini
+```
