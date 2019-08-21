@@ -7,6 +7,9 @@ Gdb - info functions\
 objdump\
 ROPGadget
 
+## Docs
+R2 - https://github.com/radare/radare2/blob/master/doc/intro.md
+
 ## 0) Ret2win
 
 ### GDB function
