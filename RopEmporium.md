@@ -778,3 +778,57 @@ badchars are: b i c / <space> f n s
 ROPE{a_placeholder_32byte_flag!}
 $  
 ```
+
+## Fluff
+
+### NM
+```
+[root:~/Downloads/RopEmporium]# nm ./fluff | grep ' t '
+0000000000400680 t deregister_tm_clones
+0000000000400700 t __do_global_dtors_aux
+0000000000400720 t frame_dummy
+00000000004007b5 t pwnme
+00000000004006c0 t register_tm_clones
+0000000000400807 t usefulFunction
+```
+### GDB info functions
+```
+gdb-peda$ info functions 
+All defined functions:
+
+Non-debugging symbols:
+0x00000000004005a0  _init
+0x00000000004005d0  puts@plt
+0x00000000004005e0  system@plt
+0x00000000004005f0  printf@plt
+0x0000000000400600  memset@plt
+0x0000000000400610  __libc_start_main@plt
+0x0000000000400620  fgets@plt
+0x0000000000400630  setvbuf@plt
+0x0000000000400640  __gmon_start__@plt
+0x0000000000400650  _start
+0x0000000000400680  deregister_tm_clones
+0x00000000004006c0  register_tm_clones
+0x0000000000400700  __do_global_dtors_aux
+0x0000000000400720  frame_dummy
+0x0000000000400746  main
+0x00000000004007b5  pwnme
+0x0000000000400807  usefulFunction
+0x0000000000400820  questionableGadgets
+0x0000000000400860  __libc_csu_init
+0x00000000004008d0  __libc_csu_fini
+0x00000000004008d4  _fini
+```
+### Exploit (launch /bin/sh)
+```
+
+```
+### Result (launch /bin/sh)
+```
+
+```
+
+
+
+
+
