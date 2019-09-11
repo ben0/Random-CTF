@@ -896,18 +896,128 @@ io.interactive()
 ```
 ### Result (launch /bin/sh)
 ```
-[root:~/Downloads/RopEmporium]# python fluff-pwntools-exploit.py
+[root:~/Downloads/RopEmporium]# python exploit-fluff-x64.py
 [*] '/root/Downloads/RopEmporium/fluff'
     Arch:     amd64-64-little
     RELRO:    Partial RELRO
     Stack:    No canary found
     NX:       NX enabled
     PIE:      No PIE (0x400000)
-[+] Starting local process '/root/Downloads/RopEmporium/fluff': pid 34612
+[+] Starting local process '/root/Downloads/RopEmporium/fluff': pid 38717
 [*] Switching to interactive mode
 fluff by ROP Emporium
 64bits
 
 You know changing these strings means I have to rewrite my solutions...
-> $  
+> $ whoami
+root
+```
+
+## Pivot
+
+### nm -i ....
+```
+[root:~/Downloads/RopEmporium]# rabin2 -I pivot   
+arch     x86
+baddr    0x400000
+binsz    11395
+bintype  elf
+bits     64
+canary   false
+sanitiz  false
+class    ELF64
+crypto   false
+endian   little
+havecode true
+intrp    /lib64/ld-linux-x86-64.so.2
+laddr    0x0
+lang     c
+linenum  true
+lsyms    true
+machine  AMD x86-64 architecture
+maxopsz  16
+minopsz  1
+nx       true
+os       linux
+pcalign  0
+pic      false
+relocs   true
+relro    partial
+rpath    ./
+static   false
+stripped false
+subsys   linux
+va       true
+```
+
+### NM
+```
+[root:~/Downloads/RopEmporium]# nm  ./pivot | grep ' t '
+00000000004008d0 t deregister_tm_clones
+0000000000400950 t __do_global_dtors_aux
+0000000000400970 t frame_dummy
+0000000000400a3b t pwnme
+0000000000400910 t register_tm_clones
+0000000000400ae2 t uselessFunction
+```
+### Rabin2
+```
+[root:~/Downloads/RopEmporium]# rabin2 -i pivot
+[Imports]
+Num  Vaddr       Bind      Type Name
+   1 0x004007f0  GLOBAL    FUNC free
+   2 0x00000000    WEAK  NOTYPE _ITM_deregisterTMCloneTable
+   3 0x00400800  GLOBAL    FUNC puts
+   4 0x00400810  GLOBAL    FUNC printf
+   5 0x00400820  GLOBAL    FUNC memset
+   6 0x00400830  GLOBAL    FUNC __libc_start_main
+   7 0x00400840  GLOBAL    FUNC fgets
+   8 0x00000000    WEAK  NOTYPE __gmon_start__
+   9 0x00400850  GLOBAL    FUNC foothold_function
+  10 0x00400860  GLOBAL    FUNC malloc
+  11 0x00400870  GLOBAL    FUNC setvbuf
+  12 0x00000000    WEAK  NOTYPE _Jv_RegisterClasses
+  13 0x00400880  GLOBAL    FUNC exit
+  14 0x00000000    WEAK  NOTYPE _ITM_registerTMCloneTable
+   2 0x00000000    WEAK  NOTYPE _ITM_deregisterTMCloneTable
+   8 0x00000000    WEAK  NOTYPE __gmon_start__
+  12 0x00000000    WEAK  NOTYPE _Jv_RegisterClasses
+  14 0x00000000    WEAK  NOTYPE _ITM_registerTMCloneTable
+```
+### GDB info functions
+```
+pwndbg> info functions 
+All defined functions:
+
+Non-debugging symbols:
+0x00000000004007b8  _init
+0x00000000004007f0  free@plt
+0x0000000000400800  puts@plt
+0x0000000000400810  printf@plt
+0x0000000000400820  memset@plt
+0x0000000000400830  __libc_start_main@plt
+0x0000000000400840  fgets@plt
+0x0000000000400850  foothold_function@plt
+0x0000000000400860  malloc@plt
+0x0000000000400870  setvbuf@plt
+0x0000000000400880  exit@plt
+0x0000000000400890  __gmon_start__@plt
+0x00000000004008a0  _start
+0x00000000004008d0  deregister_tm_clones
+0x0000000000400910  register_tm_clones
+0x0000000000400950  __do_global_dtors_aux
+0x0000000000400970  frame_dummy
+0x0000000000400996  main
+0x0000000000400a3b  pwnme
+0x0000000000400ae2  uselessFunction
+0x0000000000400b00  usefulGadgets
+0x0000000000400b10  __libc_csu_init
+0x0000000000400b80  __libc_csu_fini
+0x0000000000400b84  _fini
+```
+### Exploit (launch /bin/sh)
+```
+```
+### Result (launch /bin/sh)
+```
 ```
