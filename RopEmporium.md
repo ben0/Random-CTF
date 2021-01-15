@@ -11,6 +11,8 @@ Rabin2\
 R2 - izz\
 Gdb - info functions\
 objdump\
+NM\
+
 ROPGadget
 
 ## Docs
