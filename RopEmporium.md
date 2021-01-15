@@ -4,7 +4,7 @@
 GDB stdin: `run < <(python -c 'print("\xef\xbe\xad\xde")')`\
 Stdin: `python -c 'print("\xef\xbe\xad\xde")' | ./program`\
 GDB args: `set args ...`\
-Console: `./program \`python -c 'print("\xef\xbe\xad\xde")'\``\
+Console: `./program \`python -c 'print("\xef\xbe\xad\xde")'\`\
 
 ## Tools
 Rabin2\
