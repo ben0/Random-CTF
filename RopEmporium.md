@@ -12,7 +12,7 @@ R2 - izz\
 Gdb - info functions\
 objdump\
 NM\
-
+Objdump\
 ROPGadget
 
 ## Docs
